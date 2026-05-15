@@ -29,9 +29,10 @@ RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage \
     && chmod -R 755 /var/www/html/bootstrap/cache
 
-# Apache config - point to Laravel public folder
-RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf \
-    && a2enmod rewrite
+# Apache config - fix MPM conflict and point to Laravel public folder
+RUN a2dismod mpm_event || true \
+    && a2enmod mpm_prefork rewrite \
+    && sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
 
 # Copy .env
 COPY .env.example .env
